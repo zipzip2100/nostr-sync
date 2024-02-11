@@ -7,5 +7,7 @@ export function getRelayList() {
     },
     { url: "wss://relay.damus.io", read: true, write: true },
     { url: "wss://relayable.org", read: true, write: false },
+    { url: "wss://nostr.oxtr.dev", read: true, write: true },
+    { url: "wss://nostr.fmt.wiz.biz", read: true, write: true },
   ].filter((e) => e);
 }

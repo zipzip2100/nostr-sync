@@ -1,5 +1,5 @@
 "use client";
-
+import React from "react";
 import {
   Box,
   Flex,
@@ -21,6 +21,16 @@ import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 function Header() {
   const { colorMode, toggleColorMode } = useColorMode();
+
+  // fix chakra-ui color mode issue
+  React.useEffect(() => {
+    async function setDark() {
+      if (localStorage.getItem("chakra-ui-color-mode") === null) {
+        toggleColorMode();
+      }
+    }
+    setDark();
+  }, [colorMode, toggleColorMode]);
 
   return (
     <>
