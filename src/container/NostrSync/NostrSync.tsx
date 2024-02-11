@@ -1,5 +1,5 @@
 import React from "react";
-import { Stack, StackDivider, Box, Heading, Button, ButtonGroup } from "@chakra-ui/react";
+import { Stack, StackDivider, Box, Heading, Button, ButtonGroup, useToast } from "@chakra-ui/react";
 import { nip19 } from "nostr-tools";
 
 import { NostrRelayInstance } from "@/utils/NostrRelay";
@@ -16,6 +16,8 @@ export default function NostrSync() {
   const [pubkey, _setPubkey] = React.useState<string>();
   const [events, setEvents] = React.useState<Map<string, NostrEvent>>(new Map());
   const [relays, setRelays] = React.useState<Map<string, RelayInstance>>(new Map());
+
+  const toast = useToast();
 
   const addRelay = React.useCallback((relay: RelayInstance) => {
     setRelays((prev) => {
@@ -35,12 +37,24 @@ export default function NostrSync() {
 
   const restoreEvents = React.useCallback(
     async (relay: RelayInstance) => {
-      await relay.restore(Array.from(events.values()));
-      if (pubkey) {
-        await relay.connect(pubkey);
+      try {
+        await relay.restore(Array.from(events.values()));
+        if (pubkey) {
+          await relay.connect(pubkey);
+        }
+      } catch (e) {
+        console.error(e);
+        toast({
+          title: `Restore failed for ${relay.url}`,
+          description: `Message ${e}`,
+          status: "error",
+          position: "bottom-left",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     },
-    [events, pubkey]
+    [events, pubkey, toast]
   );
 
   const registerRelays = async (pubkey: string) => {

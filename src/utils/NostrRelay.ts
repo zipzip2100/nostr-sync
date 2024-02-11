@@ -88,6 +88,11 @@ export class NostrRelayInstance implements RelayInstance {
       if (this._eventIds.has(event.id) || !this._instance) {
         return;
       }
+
+      if (!this._instance.connected) {
+        throw new Error("instance not connected");
+      }
+
       const sync = this._instance.publish(event).then((res) => {
         console.log(`published event ${event.id} to ${this._url}`);
         this._eventIds.add(event.id);
