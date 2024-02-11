@@ -8,6 +8,7 @@ import {
   ButtonGroup,
   StackDivider,
   Icon,
+  Text,
 } from "@chakra-ui/react";
 import {
   MdCheckCircleOutline,
@@ -32,6 +33,8 @@ export enum Kind {
   BadgeAward = 8,
 }
 
+const exKinds = ["0", "3"];
+
 export default function SyncStats({
   events,
   relays,
@@ -46,6 +49,15 @@ export default function SyncStats({
   restoreEvents: (relay: RelayInstance) => void;
 }) {
   const kindStats = countBy(Array.from(events.values()), "kind");
+
+  const profileRaw = Array.from(events).find(([id, event]) => event.kind === Kind.Metadata)?.[1]
+    .content;
+  const contactList = Array.from(events).find(
+    ([id, event]) => event.kind === Kind.ContactList
+  )?.[1];
+
+  const profile = profileRaw && JSON.parse(profileRaw);
+
   return (
     <>
       <Stack spacing={4} align="stretch" direction={"column"} px={6}>
@@ -62,13 +74,32 @@ export default function SyncStats({
         </Stack>
 
         <SimpleGrid columns={{ sm: 1, md: 2 }} spacing={12}>
-          <Stack divider={<StackDivider borderColor="gray.500" />}>
-            {Object.keys(kindStats).map((kind) => (
-              <Stack key={`Kind-${kind}`} direction={"row"} justifyContent="space-between">
-                <div>{Kind[parseInt(kind)] || `kind ${kind}`}</div>
-                <div>{kindStats[kind]}</div>
+          <Stack spacing={4}>
+            {profile && (
+              <Stack divider={<StackDivider borderColor="gray.500" />}>
+                <Text>Profile</Text>
+
+                <Text>
+                  {Object.keys(profile)
+                    .filter((key) => profile[key] !== "")
+                    .join(", ")}
+                </Text>
               </Stack>
-            ))}
+            )}
+            <Stack divider={<StackDivider borderColor="gray.500" />}>
+              <Text>Contacts</Text>
+              <Text>{contactList?.tags.length} followed keys</Text>
+            </Stack>
+          </Stack>
+          <Stack divider={<StackDivider borderColor="gray.500" />}>
+            {Object.keys(kindStats)
+              .filter((kind) => !exKinds.includes(kind))
+              .map((kind) => (
+                <Stack key={`Kind-${kind}`} direction={"row"} justifyContent="space-between">
+                  <div>{Kind[parseInt(kind)] || `kind ${kind}`}</div>
+                  <div>{kindStats[kind]}</div>
+                </Stack>
+              ))}
           </Stack>
         </SimpleGrid>
       </Stack>
